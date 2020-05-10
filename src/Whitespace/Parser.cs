@@ -1,5 +1,4 @@
 using DotNot.Generators;
-using DotNot.Parsers;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
@@ -28,47 +27,71 @@ namespace DotNot.Whitespace
             var sb = new StringBuilder();
 
             var charStream = sourceText.ToString().GetEnumerator();
-            var parser = new InstructionModificationParser<char>(
-                new Dictionary<char[], Action<InstructionModificationParser<char>>>()
+            bool finalized = false;
+
+            var parserActions = new Dictionary<char[], Action>()
                 {
                     // [Space] Stack manipulation
                     {
-                        new [] {' '}, _ => OnStackManipulation(charStream, generator)
+                        new [] {' '}, () => OnStackManipulation(charStream, generator)
                     },
 
                     // [Tab][Space] Arithmetic
                     {
-                        new [] {'\t', ' '}, _ => OnArithmetic(charStream, generator)
+                        new [] {'\t', ' '}, () => OnArithmetic(charStream, generator)
                     },
 
                     // [Tab][Tab] Heap Access
                     {
-                        new [] {'\t', '\t'}, _ => OnHeapAccess(charStream, generator)
+                        new [] {'\t', '\t'}, () => OnHeapAccess(charStream, generator)
                     },
 
                     // [LF] Flow Control
                     {
-                        new [] {'\n'}, _ => OnFlowControl(charStream, generator)
+                        new [] {'\n'}, () => OnFlowControl(charStream, generator)
                     },
 
                     // [Tab][LF] I/O
                     {
-                        new [] {'\t', '\n'}, _ => OnIO(charStream, generator)
+                        new [] {'\t', '\n'}, () => OnIO(charStream, generator)
                     },
 
                     // [LF][LF][LF] End of Program
                     {
-                        new [] {'\n', '\n', '\n' }, parser =>
+                        new [] {'\n', '\n', '\n' }, () =>
                         {
-                            parser.MarkFinalized();
+                            finalized = true;
                         }
                     }
-                });
+                };
 
-            while (parser.ParseInstructionModification(charStream))
-            { }
+            while (!finalized)
+            {
+                ParseInstructionModification(parserActions, charStream);
+            }
 
             return generator;
+        }
+
+        private static void ParseInstructionModification(Dictionary<char[], Action> parserActions, CharEnumerator charStream)
+        {
+            List<char> charStack = new List<char>();
+
+            while(charStream.MoveNext())
+            {
+                charStack.Add(charStream.Current);
+
+                if (parserActions.TryGetValue(charStack.ToArray(), out var action))
+                {
+                    action();
+                    charStack.Clear();
+                }
+            }
+
+            if (charStack.Any())
+            {
+                throw new Exception();
+            }
         }
 
         private static void OnIO(CharEnumerator charStream, StackBasedGenerator generator)
