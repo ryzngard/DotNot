@@ -16,7 +16,7 @@ namespace Whitespace
             foreach (var file in context.AdditionalFiles)
             {
                 var extension = Path.GetExtension(file.Path);
-                if (extension == "ws")
+                if (extension == ".ws")
                 {
                     var sourceText = Parser.ParseFile(file, context.CancellationToken);
                     if (sourceText is null)

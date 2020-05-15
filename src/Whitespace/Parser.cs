@@ -131,6 +131,51 @@ namespace DotNot.Whitespace
             // [LF]	        [Tab][Tab]	    Label	    Jump to a label if the top of the stack is negative
             // [LF]	        [Tab][LF]	    -	        End a subroutine and transfer control back to the caller
             // [LF]	        [LF][LF]	    -	        End the program
+            var first = AssertGetNext(charStream);
+            var second = AssertGetNext(charStream);
+
+            if (first == ' ')
+            {
+                switch (second)
+                {
+                    case ' ':
+                        // get the location name and add to the generator
+                        return;
+
+                    case '\t':
+                        // Get label and call subroutine
+                        return;
+
+                    case '\n':
+                        // Get label and jump to that label
+                        return;
+                }
+            }
+            else if (first == '\t')
+            {
+                switch (second)
+                {
+                    case ' ':
+                        // Get label and jump if the top of the stack is zero
+                        return;
+
+                    case '\t':
+                        // Get label and jump if the top of the stack is negative
+                        return;
+                    case '\n':
+                        // End subroutine
+                        return;
+                }
+            }
+            else if (first == '\n')
+            {
+                if (second == '\n')
+                {
+                    // End program
+                    return;
+                }
+            }
+
             throw new NotImplementedException();
         }
 
