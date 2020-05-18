@@ -1,15 +1,16 @@
 ﻿using DotNot.Whitespace;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Whitespace
+[assembly: InternalsVisibleTo("Whitespace.TestProject")]
+
+namespace DotNot.Whitespace
 {
     [Generator]
-    class SourceGenerator : ISourceGenerator
+    public class WhitespaceSourceGenerator : ISourceGenerator
     {
         public void Execute(SourceGeneratorContext context)
         {

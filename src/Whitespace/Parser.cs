@@ -29,7 +29,7 @@ namespace DotNot.Whitespace
             var charStream = sourceText.ToString().GetEnumerator();
             bool finalized = false;
 
-            var parserActions = new Dictionary<char[], Action>()
+            var parserActions = new Dictionary<char[], Action>(CharArrayEqualityComparer.Default)
                 {
                     // [Space] Stack manipulation
                     {
@@ -48,20 +48,15 @@ namespace DotNot.Whitespace
 
                     // [LF] Flow Control
                     {
-                        new [] {'\n'}, () => OnFlowControl(charStream, generator)
+                        new [] {'\n'}, () =>
+                        {
+                            finalized = OnFlowControl(charStream, generator);
+                        }
                     },
 
                     // [Tab][LF] I/O
                     {
                         new [] {'\t', '\n'}, () => OnIO(charStream, generator)
-                    },
-
-                    // [LF][LF][LF] End of Program
-                    {
-                        new [] {'\n', '\n', '\n' }, () =>
-                        {
-                            finalized = true;
-                        }
                     }
                 };
 
@@ -76,10 +71,14 @@ namespace DotNot.Whitespace
         private static void ParseInstructionModification(Dictionary<char[], Action> parserActions, CharEnumerator charStream)
         {
             List<char> charStack = new List<char>();
+            int index = 0;
+            List<char> all = new List<char>();
 
             while(charStream.MoveNext())
             {
                 charStack.Add(charStream.Current);
+                all.Add(charStream.Current);
+                index++;
 
                 if (parserActions.TryGetValue(charStack.ToArray(), out var action))
                 {
@@ -122,7 +121,7 @@ namespace DotNot.Whitespace
             throw new NotImplementedException();
         }
 
-        private static void OnFlowControl(CharEnumerator charStream, StackBasedGenerator generator)
+        private static bool OnFlowControl(CharEnumerator charStream, StackBasedGenerator generator)
         {
             // [LF]	        [Space][Space]	Label	    Mark a location in the program
             // [LF]	        [Space][Tab]	Label	    Call a subroutine
@@ -140,15 +139,15 @@ namespace DotNot.Whitespace
                 {
                     case ' ':
                         // get the location name and add to the generator
-                        return;
+                        return false;
 
                     case '\t':
                         // Get label and call subroutine
-                        return;
+                        return false;
 
                     case '\n':
                         // Get label and jump to that label
-                        return;
+                        return false;
                 }
             }
             else if (first == '\t')
@@ -157,14 +156,14 @@ namespace DotNot.Whitespace
                 {
                     case ' ':
                         // Get label and jump if the top of the stack is zero
-                        return;
+                        return false;
 
                     case '\t':
                         // Get label and jump if the top of the stack is negative
-                        return;
+                        return false;
                     case '\n':
                         // End subroutine
-                        return;
+                        return false;
                 }
             }
             else if (first == '\n')
@@ -172,7 +171,7 @@ namespace DotNot.Whitespace
                 if (second == '\n')
                 {
                     // End program
-                    return;
+                    return true;
                 }
             }
 
@@ -188,10 +187,12 @@ namespace DotNot.Whitespace
             if (first == ' ')
             {
                 generator.AddHeapStore();
+                return;
             }
             else if (first == '\t')
             {
                 generator.AddHeapRetrieve();
+                return;
             }
 
             throw new NotImplementedException();
@@ -315,6 +316,24 @@ namespace DotNot.Whitespace
         {
             if (!charStream.MoveNext()) throw new Exception();
             return charStream.Current;
+        }
+
+        private class CharArrayEqualityComparer : IEqualityComparer<char[]>
+        {
+            public static CharArrayEqualityComparer Default = new CharArrayEqualityComparer();
+            public bool Equals(char[] x, char[] y)
+            => x.SequenceEqual(y);
+
+            public int GetHashCode(char[] obj)
+            {
+                int hashCode = 0;
+                foreach (var c in obj)
+                {
+                    hashCode = HashCode.Combine(hashCode, c.GetHashCode());
+                }
+
+                return hashCode;
+            }
         }
     }
 }

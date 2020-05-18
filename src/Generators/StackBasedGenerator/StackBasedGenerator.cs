@@ -1,4 +1,5 @@
 ﻿using DotNot.Generators.StackGenerator;
+using Generators.StackBasedGenerator;
 using System;
 using System.Collections.Generic;
 
@@ -25,67 +26,67 @@ namespace DotNot.Generators
 
         public void AddNumberPush(int number)
         {
-            var pushOperation = new PushOperation(number);
+            _commands.Add(new PushOperation(number));
         }
 
         public void AddTopStackDuplication()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.StackDuplicate);
         }
 
         public void AddTopStackSwap()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.StackSwap);
         }
 
         public void DiscardTopStack()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.PopStack);
         }
 
         public void AddAddition()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.Addition);
         }
 
         public void AddSubtraction()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.Subtraction);
         }
 
         public void AddMultiplication()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.Multiplication);
         }
 
         public void AddDivision()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.Division);
         }
 
         public void AddModulo()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.Modulo);
         }
 
         public void AddHeapStore()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.AddToHeap);
         }
 
         public void AddHeapRetrieve()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.RetrieveFromHeap);
         }
 
         public void OutputTopStackChar()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.OutputTopStackChar);
         }
 
         public void OutputTopStackNumber()
         {
-            throw new NotImplementedException();
+            _commands.Add(SimpleCommands.OutputTopStackNumber);
         }
     }
 }
