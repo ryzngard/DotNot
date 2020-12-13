@@ -12,7 +12,7 @@ namespace DotNot.Whitespace
     [Generator]
     public class WhitespaceSourceGenerator : ISourceGenerator
     {
-        public void Execute(SourceGeneratorContext context)
+        public void Execute(GeneratorExecutionContext context)
         {
             foreach (var file in context.AdditionalFiles)
             {
@@ -30,7 +30,7 @@ namespace DotNot.Whitespace
             }
         }
 
-        public void Initialize(InitializationContext context)
+        public void Initialize(GeneratorInitializationContext context)
         {
             // No initialization needed
         }

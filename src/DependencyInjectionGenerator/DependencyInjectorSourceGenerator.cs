@@ -16,17 +16,17 @@ namespace DotNot.DependencyInjection
     [Generator]
     class DependencyInjectorSourceGenerator : ISourceGenerator
     {
-        public void Execute(SourceGeneratorContext context)
+        public void Initialize(GeneratorInitializationContext context)
+        {
+        }
+
+        public void Execute(GeneratorExecutionContext context)
         {
             if (context.Compilation.SyntaxTrees.FirstOrDefault() is CSharpSyntaxTree)
             {
                 var newSourceFile = Generate(context.Compilation, context.CancellationToken);
                 context.AddSource("ServiceLocator.cs", newSourceFile);
             }
-        }
-
-        public void Initialize(InitializationContext context)
-        {
         }
 
         public static SourceText Generate(Compilation compilation, CancellationToken cancellationToken)
